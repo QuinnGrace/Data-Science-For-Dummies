@@ -1,18 +1,20 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
-import pickle
-import sklearn
-from sklearn.preprocessing import OneHotEncoder
+import streamlit as st # Website building
+import pandas as pd # DataFrame handling
+import numpy as np # Data manipulation
+import pickle # Importing ready models
+import sklearn # Breaks without this for some reason
+from sklearn.preprocessing import OneHotEncoder # Creates dummies
 
-
+# Create the app
 def main():
+	# Heading
 	st.title('Mathematics Grade Predictor')
 
+	# Buttons to select options
 	sex = st.radio(
     "What's the sex of the student?",
     ["Female", "Male"])
-
+	# Changing the data to a format the model will recognize
 	if sex == "Female":
 		sex = "F"
 	else:
@@ -104,35 +106,49 @@ def main():
 		higher = "yes"
 	else:
 		higher = "no"
-
+	
+	# Collecting all the chosen options into a list
 	result = [sex, address, Medu, Fedu, Mjob, reason, paid, higher]
+	# Preparing the list to be turned into a dataframe
 	result = np.reshape(result, (8, 1)).T
+	# Turning the list into a dataframe
 	df = pd.DataFrame(result)
 
+	# "unpickling" (opening) the OneHotEncoder
 	model_load_path = "encoder.pkl"
 	with open(model_load_path,'rb') as file:
 		encoder = pickle.load(file)
 
+	# Using the OneHotEncoder on our list
 	result = encoder.transform(df)
 
+	# "unpickling" (opening) the trained linear model
 	model_load_path = "lr_model.pkl"
 	with open(model_load_path,'rb') as file:
 		unpickled_model = pickle.load(file)
 
+	# Predicting the grade with the model
 	prediction = unpickled_model.predict(result)
 
+	# Changing the prediction to a 100 point scale so South Africans can understand
+	prediction = prediction * 5
+
+	# Heading
 	st.title("The predicted grade is :")
-	st.write(prediction)
-	 
-	if prediction >= 10:	
+	# Write the predicted grade
+	st.write(prediction[0])
+
+	# Different output based on if the student is predicted to fail 
+	if prediction >= 50:	
 		st.image("graduation-hat.png")
 		st.write("This student is likely to pass")
-	elif prediction >= 8:
+	elif prediction >= 40:
 		st.image("person.png")
 		st.write("This student is at risk of failing")
 	else:
 		st.image("caution.png")
 		st.write("This student is at high risk of failing")
 
+# Run the app		
 if __name__ == '__main__':
 	main()
