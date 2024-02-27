@@ -2,7 +2,7 @@ import streamlit as st # Website building
 import pandas as pd # DataFrame handling
 import numpy as np # Data manipulation
 import pickle # Importing ready models
-import sklearn # Breaks without this for some reason
+import sklearn # Breaks without this because pickle depends on it
 from sklearn.preprocessing import OneHotEncoder # Creates dummies
 
 # Create the app
